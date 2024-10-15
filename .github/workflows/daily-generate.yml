@@ -22,6 +22,9 @@ jobs:
       run: npm ci
 
     - name: Run generate script
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
       run: npm run generate
 
     - name: Commit and push changes
