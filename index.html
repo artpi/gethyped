@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Episode Player</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+		audio {
+			width: 100%;
+			margin-bottom: 20px;
+		}
+		h2 {
+			margin-top: 0;
+		}
+		.episode-list {
+			list-style-type: none;
+			padding: 0;
+		}
+		.episode-item {
+			cursor: pointer;
+			padding: 10px;
+			border-bottom: 1px solid #ccc;
+		}
+		.episode-item:hover {
+			background-color: #f0f0f0;
+		}
+		.episode-date {
+			font-size: 0.8em;
+			color: #666;
+		}
+	</style>
+</head>
+<body>
+	<h1>GET HYPED 🚀</h1>
+	<h2 id="episodeTitle"></h2>
+	<h3>Template: <a id="episodeTemplate"></a></h3>
+	<audio id="audioPlayer" controls></audio>
+	<h3>All Episodes</h3>
+	<ul id="episodeList" class="episode-list"></ul>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', async () => {
+			const episodeTitle = document.getElementById('episodeTitle');
+			const audioPlayer = document.getElementById('audioPlayer');
+			const episodeList = document.getElementById('episodeList');
+
+			try {
+				const response = await fetch('output/episodes.json');
+				const episodes = await response.json();
+
+				// Sort episodes by date, latest first
+				episodes.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+				const loadEpisode = (episode) => {
+					episodeTitle.textContent = new Date(episode.time).toLocaleString();
+					document.getElementById('episodeTemplate').textContent = episode.promptTitle;
+					document.getElementById('episodeTemplate').href = './prompts/' + episode.promptId;
+					audioPlayer.src = 'output/' + episode.audioFile;
+					audioPlayer.load();
+				};
+
+				episodes.forEach((episode) => {
+					console.log(episode);
+					const li = document.createElement('li');
+					li.className = 'episode-item';
+					li.innerHTML = `
+						<strong>${new Date(episode.time).toLocaleString()}</strong><br>
+						<span class="episode-date">${episode.promptTitle}</span>
+					`;
+					li.addEventListener('click', () => loadEpisode(episode));
+					episodeList.appendChild(li);
+				});
+
+				// Load the latest episode by default
+				loadEpisode(episodes[0]);
+			} catch (error) {
+				console.error('Error loading episodes:', error);
+			}
+		});
+	</script>
+</body>
+</html>
